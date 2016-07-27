@@ -1,19 +1,24 @@
 # coding: utf-8
 
+import logging
 from flask import Flask, jsonify, request
 
 from neltharion.job import do_compile
 from neltharion.models import App
 
 
+logging.basicConfig(level=logging.INFO, format='%(levelname)s - %(asctime)s: %(message)s')
+
+
 app = Flask(__name__)
+log = logging.getLogger(__name__)
 
 
 @app.route('/hook', methods=['POST'])
 def gitlab_hook():
     data = request.get_json()
-    if not data['build_status'] == 'success':
-        print data['build_status']
+    log.info('build status: %s' % data['build_status'])
+    if data['build_status'] != 'success':
         return 'ok'
 
     do_compile(str(data['repository']['git_ssh_url']), str(data['repository']['name']), str(data['sha']))

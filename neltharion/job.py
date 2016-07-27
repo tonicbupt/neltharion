@@ -5,11 +5,15 @@ import json
 import shutil
 import envoy
 import gevent
+import logging
 import tempfile
 import contextlib
 from functools import wraps
 
 from neltharion.models import Version
+
+
+log = logging.getLogger(__name__)
 
 
 class JobError(Exception):
@@ -85,3 +89,4 @@ def do_compile(repo, project, git_hash):
                     
                 v = Version.create(dst, git_hash)
                 v.transport(src_dir)
+                log.info('%s --> %s' % (src_dir, dst))
