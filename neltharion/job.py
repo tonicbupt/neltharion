@@ -11,6 +11,7 @@ import contextlib
 from functools import wraps
 
 from neltharion.models import Version
+from neltharion.noti import send_slack_noti
 
 
 log = logging.getLogger(__name__)
@@ -60,11 +61,20 @@ def use_gevent(f):
 
 @use_gevent
 def do_compile(repo, project, git_hash):
+    try:
+        _do_compile(repo, project, git_hash)
+    except JobError as e:
+        send_slack_noti('Error when executing job (%s, %s, %s): %s' % (repo, project, git_hash, e.message))
+
+
+def _do_compile(repo, project, git_hash):
     with _temp_work_dir() as workdir:
         os.chdir(workdir)
         # 1. clone code
         log.info('cloning %s to %s ...' % (repo, project))
+        send_slack_noti('cloning %s to %s ...' % (repo, project))
         run_command('git clone %s %s' % (repo, project))
+        send_slack_noti('cloning %s to %s done' % (repo, project))
         log.info('cloning %s to %s done' % (repo, project))
         # 2. run deploy.sh
         rules = {}
@@ -75,6 +85,7 @@ def do_compile(repo, project, git_hash):
                 raise JobError('No compile.sh found in repository, ignore')
 
             log.info('read rules and compile.sh in %s ...' % project)
+            send_slack_noti('read rules and compile.sh in %s ...' % project)
             # load rules
             with open('rules', 'r') as f:
                 try:
@@ -83,6 +94,7 @@ def do_compile(repo, project, git_hash):
                     return
             # run compile.sh
             log.info('execute compile.sh in %s ...' % project)
+            send_slack_noti('execute compile.sh in %s ...' % project)
             run_command('sh compile.sh')
 
             # 3. copy files
@@ -95,3 +107,4 @@ def do_compile(repo, project, git_hash):
                 v = Version.create(dst, git_hash)
                 v.transport(src_dir)
                 log.info('%s --> %s' % (src_dir, dst))
+                send_slack_noti('%s --> %s' % (src_dir, dst))

@@ -9,6 +9,7 @@ from os.path import exists, join, isdir, isfile
 from datetime import datetime
 
 from neltharion.config import BASE_DIR
+from neltharion.noti import send_slack_noti
 
 
 log = logging.getLogger(__name__)
@@ -131,6 +132,8 @@ class Version(object):
         # shutil.copytree(self.path, dst)
         with open(special, 'w') as f:
             f.write(self.sha)
+
+        send_slack_noti(u'%s %s deployed' % (self.name, self.sha))
 
     def deploy_release(self):
         self._deploy_special(RELEASE_TAG)
