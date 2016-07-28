@@ -61,15 +61,16 @@ class App(object):
         return None
 
     def _get_special(self, tag):
-        current = join(self.path, tag)
-        try:
-            current_version = os.readlink(current)
-        except OSError:
+        version_file = join(self.path, '_' + tag)
+        if not exists(version_file):
             return None
 
-        p = join(self.path, current_version)
+        with open(version_file, 'r') as f:
+            version = f.read()
+
+        p = join(self.path, version)
         stats = os.stat(p)
-        return Version(self.name, current_version, datetime.fromtimestamp(stats.st_mtime))
+        return Version(self.name, version, datetime.fromtimestamp(stats.st_mtime))
 
     def get_release(self):
         return self._get_special(RELEASE_TAG)
@@ -102,10 +103,13 @@ class Version(object):
     def _deploy_special(self, tag):
         app = App.get(self.name)
         dst = join(app.path, tag)
+        special = join(app.path, '_' + tag)
 
         if exists(dst):
-            os.unlink(dst)
-        os.symlink(self.sha, dst)
+            shutil.rmtree(dst)
+        shutil.copytree(self.path, dst)
+        with open(special, 'w') as f:
+            f.write(self.sha)
 
     def deploy_release(self):
         self._deploy_special(RELEASE_TAG)
