@@ -9,6 +9,10 @@ from datetime import datetime
 from neltharion.config import BASE_DIR
 
 
+RELEASE_TAG = 'current'
+PRE_TAG = 'pre'
+
+
 class App(object):
 
     def __init__(self, name):
@@ -38,7 +42,7 @@ class App(object):
         result = []
         for f in os.listdir(self.path):
             f = f.strip()
-            if f == 'current':
+            if f in (RELEASE_TAG, PRE_TAG):
                 continue
 
             path = join(self.path, f)
@@ -56,8 +60,8 @@ class App(object):
                 return v
         return None
 
-    def get_current(self):
-        current = join(self.path, 'current')
+    def _get_special(self, tag):
+        current = join(self.path, tag)
         try:
             current_version = os.readlink(current)
         except OSError:
@@ -66,6 +70,12 @@ class App(object):
         p = join(self.path, current_version)
         stats = os.stat(p)
         return Version(self.name, current_version, datetime.fromtimestamp(stats.st_mtime))
+
+    def get_release(self):
+        return self._get_special(RELEASE_TAG)
+
+    def get_pre(self):
+        return self._get_special(PRE_TAG)
 
     def to_dict(self):
         return {'name': self.name, 'path': self.path}
@@ -89,13 +99,19 @@ class Version(object):
     def transport(self, src):
         shutil.copytree(src, self.path)
 
-    def deploy(self):
+    def _deploy_special(self, tag):
         app = App.get(self.name)
-        dst = join(app.path, 'current')
+        dst = join(app.path, tag)
 
         if exists(dst):
             os.unlink(dst)
         os.symlink(self.sha, dst)
+
+    def deploy_release(self):
+        self._deploy_special(RELEASE_TAG)
+
+    def deploy_pre(self):
+        self._deploy_special(PRE_TAG)
 
     def to_dict(self):
         return {'name': self.name, 'sha': self.sha, 'mtime': self.mtime.strftime('%Y-%m-%d %H:%M:%S')}

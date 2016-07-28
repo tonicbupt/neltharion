@@ -1,0 +1,32 @@
+{% extends "/base.html" %}
+
+{% block main %}
+<table class="table">
+  <thead>
+    <tr>
+      <th>Name</th>
+      <th>Release</th>
+      <th>Pre</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for app in apps %}
+    {% set release = app.get_release() %}
+    {% set pre = app.get_pre() %}
+    <tr>
+      <td><a href="{{ url_for('get_app', appname=app.name) }}">{{ app.name }}</a></td>
+      {% if not release %}
+      <td><span class="label label-warning">Unknown</span></td>
+      {% else %}
+      <td><span class="label label-success">{{ release.sha[:7] }} - {{ release.mtime.strftime('%Y-%m-%d %H:%M:%S') }}</span></td>
+      {% endif %}
+      {% if not pre %}
+      <td><span class="label label-warning">Unknown</span></td>
+      {% else %}
+      <td><span class="label label-success">{{ pre.sha[:7] }} - {{ pre.mtime.strftime('%Y-%m-%d %H:%M:%S') }}</span></td>
+      {% endif %}
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
+{% endblock %}

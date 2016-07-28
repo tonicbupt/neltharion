@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>{% block title %}{% endblock %} · Neltharion </title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <!-- Le styles -->
+    <link href="/static/css/bootstrap.min.css" rel="stylesheet" type="text/css">
+    <link href="/static/css/flat-ui.min.css" rel="stylesheet" type="text/css">
+    <script src="/static/js/jquery.min.js"></script>
+    <script src="/static/js/flat-ui.min.js"></script>
+    {% block more_header %}{% endblock %}
+    <style>
+      {% block more_css %}{% endblock more_css %}
+      nav.navbar {border-radius: 0!important;}
+    </style>
+    <!-- COLLECTED CSS -->
+  </head>
+
+  <body>
+
+    {% block nav %}
+    <!-- Docs master nav -->
+    <nav class="navbar navbar-inverse" role="navigation">
+      <div class="navbar-header">
+        <a href="{{ url_for('index') }}" class="navbar-brand">Neltharion 纯静态编译发布</a>
+      </div>
+    </nav>
+    {% endblock %}
+
+    <!-- Docs page layout -->
+    <div class="bs-header" id="content">
+      <div class="container">
+        {% block more_content_header %}{% endblock %}
+      </div>
+    </div>
+
+    <div class="container bs-docs-container">
+      <div class="row">
+        {% block main %}
+        {% endblock %}
+      </div>
+    </div>
+
+    <!-- Footer ================================================== -->
+    <footer class="footer container">
+      {% block footer %}{% endblock %}
+    </footer>
+
+    <!-- Le javascript ================================================== -->
+    <!-- Placed at the end of the document so the pages load faster -->
+    {% block bottom_script %}{% endblock %}
+    <!-- COLLECTED JS -->
+  </body>
+</html>

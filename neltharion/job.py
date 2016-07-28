@@ -63,7 +63,9 @@ def do_compile(repo, project, git_hash):
     with _temp_work_dir() as workdir:
         os.chdir(workdir)
         # 1. clone code
+        log.info('cloning %s to %s ...' % (repo, project))
         run_command('git clone %s %s' % (repo, project))
+        log.info('cloning %s to %s done' % (repo, project))
         # 2. run deploy.sh
         rules = {}
         with _temp_change_dir(project):
@@ -72,6 +74,7 @@ def do_compile(repo, project, git_hash):
             if not os.path.lexists('compile.sh'):
                 raise JobError('No compile.sh found in repository, ignore')
 
+            log.info('read rules and compile.sh in %s ...' % project)
             # load rules
             with open('rules', 'r') as f:
                 try:
@@ -79,9 +82,11 @@ def do_compile(repo, project, git_hash):
                 except ValueError:
                     return
             # run compile.sh
+            log.info('execute compile.sh in %s ...' % project)
             run_command('sh compile.sh')
 
             # 3. copy files
+            log.info('copy files for %s ...' % project)
             for src, dst in rules.iteritems():
                 src_dir = os.path.join(workdir, project, src)
                 if not os.path.lexists(src_dir):

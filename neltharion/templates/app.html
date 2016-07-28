@@ -1,0 +1,64 @@
+{% extends "/base.html" %}
+
+{% block more_css %}
+span.sha { font-family: "Lucida Console", Monaco, monospace; }
+{% endblock %}
+
+{% block main %}
+<table class="table">
+  <thead>
+    <tr>
+      <th>Git Hash</th>
+      <th>Time</th>
+      <th>Operation</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for v in versions %}
+    <tr>
+      <td><span class="sha">{{ v.sha }}</span>
+        {% if v.sha == release_sha %}
+        <span class="label label-success">Release</span>
+        {% endif %}
+        {% if v.sha == pre_sha %}
+        <span class="label label-success">Pre</span>
+        {% endif %}
+      </td>
+      <td>{{ v.mtime.strftime('%Y-%m-%d %H:%M:%S') }}</td>
+      <td>
+        <a class="btn btn-xs btn-info" data-stage="release" data-name="{{ v.name }}" data-sha="{{ v.sha }}" href="#">release</a>
+        <a class="btn btn-xs btn-info" data-stage="pre" data-name="{{ v.name }}" data-sha="{{ v.sha }}" href="#">pre</a>
+      </td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
+
+<script>
+
+  (function($){
+
+    $('a.btn-xs').click(function(e) {
+      e.preventDefault();
+      var self = $(this);
+      var sha = self.data('sha');
+      var name = self.data('name');
+      var stage = self.data('stage');
+      var url = '/api/app/' + name + '/version/' + sha + '/deploy';
+      if (!confirm('确定更新这个版本到' + stage + '么?')) {
+        return;
+      }
+      $.post(url, {stage: stage}, function(r){
+        if (r.error !== null) {
+          alert(r.error);
+        } else {
+          window.location.reload();
+        }
+      });
+    
+    });
+  
+  })(jQuery);
+
+</script>
+{% endblock %}
