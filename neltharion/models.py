@@ -9,7 +9,7 @@ from datetime import datetime
 from neltharion.config import BASE_DIR
 
 
-RELEASE_TAG = 'current'
+RELEASE_TAG = 'release'
 PRE_TAG = 'pre'
 
 
