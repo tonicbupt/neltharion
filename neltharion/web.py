@@ -7,6 +7,9 @@ from neltharion.job import do_compile
 from neltharion.models import App
 
 
+logging.getLogger('requests').setLevel(logging.CRITICAL)
+logging.getLogger('urllib3').setLevel(logging.CRITICAL)
+
 logging.basicConfig(level=logging.INFO, format='%(levelname)s - %(asctime)s: %(message)s')
 
 
