@@ -2,6 +2,7 @@
 
 import os
 import operator
+import logging
 import time
 import shutil
 from os.path import exists, join, isdir, isfile
@@ -10,6 +11,7 @@ from datetime import datetime
 from neltharion.config import BASE_DIR
 
 
+log = logging.getLogger(__name__)
 RELEASE_TAG = 'release'
 PRE_TAG = 'pre'
 
@@ -119,8 +121,10 @@ class Version(object):
         special = join(app.path, '_' + tag)
 
         # 我会被雷劈死的吧?
+        log.info('removing files: rm -rf %s/*' % dst)
         os.system('rm -rf %s/*' % dst)
         time.sleep(0.5)
+        log.info('copying files: cp -r %s/* %s' % (self.path, dst))
         os.system('cp -r %s/* %s' % (self.path, dst))
         # if exists(dst):
         #     clean_dir(dst)
