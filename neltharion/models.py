@@ -2,6 +2,7 @@
 
 import os
 import operator
+import time
 import shutil
 from os.path import exists, join, isdir, isfile
 from datetime import datetime
@@ -118,8 +119,9 @@ class Version(object):
         special = join(app.path, '_' + tag)
 
         # 我会被雷劈死的吧?
-        os.system('rm -rf %s/*' % str(dst))
-        os.system('cp -r %s/* %s/' % (self.path, dst))
+        os.system('rm -rf %s/*' % dst)
+        time.sleep(0.5)
+        os.system('cp -r %s/* %s' % (self.path, dst))
         # if exists(dst):
         #     clean_dir(dst)
         # shutil.copytree(self.path, dst)
