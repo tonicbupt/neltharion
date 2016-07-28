@@ -3,7 +3,7 @@
 import os
 import operator
 import shutil
-from os.path import exists, join, isdir
+from os.path import exists, join, isdir, isfile
 from datetime import datetime
 
 from neltharion.config import BASE_DIR
@@ -11,6 +11,18 @@ from neltharion.config import BASE_DIR
 
 RELEASE_TAG = 'release'
 PRE_TAG = 'pre'
+
+
+def clean_dir(directory):
+    for f in os.listdir(directory):
+        path = join(directory, f)
+        try:
+            if isdir(path):
+                shutil.rmtree(path)
+            elif isfile(path):
+                os.remove(path)
+        except OSError:
+            pass
 
 
 class App(object):
@@ -105,9 +117,12 @@ class Version(object):
         dst = join(app.path, tag)
         special = join(app.path, '_' + tag)
 
-        if exists(dst):
-            shutil.rmtree(dst)
-        shutil.copytree(self.path, dst)
+        # 我会被雷劈死的吧?
+        os.system('rm -rf %s/*' % str(dst))
+        os.system('cp -r %s/* %s/' % (self.path, dst))
+        # if exists(dst):
+        #     clean_dir(dst)
+        # shutil.copytree(self.path, dst)
         with open(special, 'w') as f:
             f.write(self.sha)
 
