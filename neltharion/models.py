@@ -133,7 +133,7 @@ class Version(object):
         with open(special, 'w') as f:
             f.write(self.sha)
 
-        send_slack_noti(u'%s %s deployed' % (self.name, self.sha))
+        send_slack_noti(u'[%s] [%s] [%s] deployed' % (self.name, self.sha, tag))
 
     def deploy_release(self):
         self._deploy_special(RELEASE_TAG)
