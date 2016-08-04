@@ -106,6 +106,9 @@ class Version(object):
         self.mtime = mtime
         self.path = join(BASE_DIR, name, sha)
 
+    def __eq__(self, other):
+        return isinstance(other, self.__class__) and other.name == self.name and other.sha == self.sha
+
     @classmethod
     def create(cls, name, sha):
         v = cls(name, sha, datetime.now())
@@ -122,10 +125,10 @@ class Version(object):
         special = join(app.path, '_' + tag)
 
         # 我会被雷劈死的吧?
-        log.info('removing files: rm -rf %s/*' % dst)
+        log.info('removing files: rm -rf %s/*', dst)
         os.system('rm -rf %s/*' % dst)
         time.sleep(0.5)
-        log.info('copying files: cp -r %s/* %s' % (self.path, dst))
+        log.info('copying files: cp -r %s/* %s', self.path, dst)
         os.system('cp -r %s/* %s' % (self.path, dst))
         # if exists(dst):
         #     clean_dir(dst)
@@ -140,6 +143,19 @@ class Version(object):
 
     def deploy_pre(self):
         self._deploy_special(PRE_TAG)
+
+    def delete(self):
+        app = App.get(self.name)
+        if not app:
+            return
+
+        release = app.get_release()
+        pre = app.get_pre()
+        if self == release or self == pre:
+            return
+
+        shutil.rmtree(self.path)
+        log.info('version %s %s deleted, dir %s removed', self.name, self.sha, self.path)
 
     def to_dict(self):
         return {'name': self.name, 'sha': self.sha, 'mtime': self.mtime.strftime('%Y-%m-%d %H:%M:%S')}

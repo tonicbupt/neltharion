@@ -42,7 +42,7 @@ def get_app(appname):
 @app.route('/hook', methods=['POST'])
 def gitlab_hook():
     data = request.get_json()
-    log.info('build status: %s' % data['build_status'])
+    log.info('build status: %s', data['build_status'])
     if data['build_status'] != 'success':
         return 'ok'
 
@@ -85,4 +85,18 @@ def deploy(appname, sha):
         version.deploy_release()
     elif stage == 'pre':
         version.deploy_pre()
+    return jsonify({'error': None})
+
+
+@app.route('/api/app/<path:appname>/version/<sha>/delete', methods=['POST'])
+def delete(appname, sha):
+    app = App.get(appname)
+    if not app:
+        return jsonify({'error': 'app not found'}), 404
+
+    version = app.get_version(sha)
+    if not version:
+        return jsonify({'error': 'version not found'}), 404
+
+    version.delete()
     return jsonify({'error': None})

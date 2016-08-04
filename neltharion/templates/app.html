@@ -8,6 +8,7 @@ span.sha { font-family: "Lucida Console", Monaco, monospace; }
 <table class="table">
   <thead>
     <tr>
+      <th>#</th>
       <th>Git Hash</th>
       <th>Time</th>
       <th>Operation</th>
@@ -16,6 +17,7 @@ span.sha { font-family: "Lucida Console", Monaco, monospace; }
   <tbody>
     {% for v in versions %}
     <tr>
+      <td>{{ loop.index }}</td>
       <td><span class="sha">{{ v.sha }}</span>
         {% if v.sha == release_sha %}
         <span class="label label-success">Release</span>
@@ -28,6 +30,7 @@ span.sha { font-family: "Lucida Console", Monaco, monospace; }
       <td>
         <a class="btn btn-xs btn-info" data-stage="release" data-name="{{ v.name }}" data-sha="{{ v.sha }}" href="#">release</a>
         <a class="btn btn-xs btn-info" data-stage="pre" data-name="{{ v.name }}" data-sha="{{ v.sha }}" href="#">pre</a>
+        <a class="btn btn-xs btn-warning" data-name="{{ v.name }}" data-sha="{{ v.sha }}" href="#">delete</a>
       </td>
     </tr>
     {% endfor %}
@@ -38,7 +41,13 @@ span.sha { font-family: "Lucida Console", Monaco, monospace; }
 
   (function($){
 
-    $('a.btn-xs').click(function(e) {
+    $(document).on('mouseenter', '.btn-warning', function(){
+      $(this).removeClass('btn-warning').addClass('btn-danger');
+    }).on('mouseleave', '.btn-danger', function(){
+      $(this).removeClass('btn-danger').addClass('btn-warning');
+    });
+
+    $('a.btn-xs.btn-info').click(function(e) {
       e.preventDefault();
       var self = $(this);
       var sha = self.data('sha');
@@ -58,6 +67,25 @@ span.sha { font-family: "Lucida Console", Monaco, monospace; }
     
     });
   
+    $('a.btn-xs.btn-warning').click(function(e) {
+      e.preventDefault();
+      var self = $(this);
+      var sha = self.data('sha');
+      var name = self.data('name');
+      var url = '/api/app/' + name + '/version/' + sha + '/delete';
+      if (!confirm('确定删除[' + name + '/' + sha + ']这个版本么?')) {
+        return;
+      }
+      $.post(url, {}, function(r){
+        if (r.error !== null) {
+          alert(r.error);
+        } else {
+          self.parent().parent().remove();
+        }
+      });
+    
+    });
+
   })(jQuery);
 
 </script>
